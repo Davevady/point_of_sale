@@ -1,0 +1,97 @@
+/* =========================
+   SIDEBAR ANIMATION
+========================= */
+.sidebar {
+    transition: all 0.3s ease;
+}
+
+#content-wrapper {
+    transition: margin-left 0.3s ease;
+}
+
+.sidebar .nav-item .nav-link i {
+    transition: all 0.2s ease;
+}
+
+.sidebar .nav-item .nav-link span,
+.sidebar .sidebar-brand-text {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.sidebar.toggled .nav-item .nav-link span,
+.sidebar.toggled .sidebar-brand-text {
+    opacity: 0;
+    transform: translateX(-10px);
+}
+
+.sidebar .nav-item .nav-link:hover {
+    transform: translateX(3px);
+    transition: all 0.2s ease;
+}
+
+/* =========================
+   TABLE / DROPDOWN FIX
+========================= */
+.table-responsive {
+    overflow-x: auto;
+    overflow-y: visible !important;
+}
+
+.table-responsive .dropdown-menu {
+    z-index: 1050;
+}
+
+/* =========================
+   ACTION BUTTON
+========================= */
+.btn-action-menu {
+    min-width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 0.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* =========================
+   CARD POLISH
+========================= */
+.card {
+    border-radius: 0.75rem;
+}
+
+.card-header {
+    background-color: #fff;
+}
+
+/* =========================
+   PAGE POLISH
+========================= */
+.page-subtitle {
+    font-size: 0.875rem;
+    color: #858796;
+    margin-bottom: 0;
+}
+
+/* =========================
+   SEARCHABLE SELECT
+========================= */
+.searchable-select-trigger {
+    cursor: pointer;
+    user-select: none;
+}
+.searchable-select-trigger:hover {
+    border-color: #b7c2e0;
+}
+.searchable-select-opt {
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: background 0.1s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.searchable-select-opt:hover {
+    background-color: #f8f9fc;
+}
