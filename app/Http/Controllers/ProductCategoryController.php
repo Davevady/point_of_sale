@@ -9,6 +9,8 @@ class ProductCategoryController extends Controller
 {
     public function index(Request $request)
     {
+        abort_unless(auth()->user()->hasPermission('categories.view'), 403);
+
         $search = $request->search;
 
         $productCategories = ProductCategory::query()
@@ -24,11 +26,14 @@ class ProductCategoryController extends Controller
 
     public function create()
     {
+        abort_unless(auth()->user()->hasPermission('categories.create'), 403);
+
         return view('product-categories.create');
     }
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->hasPermission('categories.create'), 403);
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:product_categories,name',
         ]);
@@ -42,16 +47,21 @@ class ProductCategoryController extends Controller
 
     public function show(ProductCategory $productCategory)
     {
+        abort_unless(auth()->user()->hasPermission('categories.view'), 403);
+
         return view('product-categories.show', compact('productCategory'));
     }
 
     public function edit(ProductCategory $productCategory)
     {
+        abort_unless(auth()->user()->hasPermission('categories.edit'), 403);
+
         return view('product-categories.edit', compact('productCategory'));
     }
 
     public function update(Request $request, ProductCategory $productCategory)
     {
+        abort_unless(auth()->user()->hasPermission('categories.edit'), 403);
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:product_categories,name,' . $productCategory->id,
         ]);
@@ -65,6 +75,8 @@ class ProductCategoryController extends Controller
 
     public function destroy(ProductCategory $productCategory)
     {
+        abort_unless(auth()->user()->hasPermission('categories.delete'), 403);
+
         $productCategory->delete();
 
         return redirect()

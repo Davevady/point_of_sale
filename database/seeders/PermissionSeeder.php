@@ -45,6 +45,10 @@ class PermissionSeeder extends Seeder
             ['name' => 'roles.view',   'label' => 'Lihat Role',   'group' => 'Roles'],
             ['name' => 'roles.manage', 'label' => 'Kelola Role',  'group' => 'Roles'],
 
+            // Permissions
+            ['name' => 'permissions.view',   'label' => 'Lihat Permission',   'group' => 'Permissions'],
+            ['name' => 'permissions.manage', 'label' => 'Kelola Permission',  'group' => 'Permissions'],
+
             // Reports
             ['name' => 'reports.view', 'label' => 'Lihat Laporan', 'group' => 'Reports'],
         ];
@@ -77,6 +81,7 @@ class PermissionSeeder extends Seeder
                 'categories.view',
                 'users.view',
                 'roles.view',
+                'permissions.view',
                 'reports.view',
             ],
         ];

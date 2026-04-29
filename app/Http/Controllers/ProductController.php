@@ -10,6 +10,8 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
+        abort_unless(auth()->user()->hasPermission('products.view'), 403);
+
         $search = $request->search;
         $category = $request->category;
 
@@ -30,6 +32,8 @@ class ProductController extends Controller
 
     public function create()
     {
+        abort_unless(auth()->user()->hasPermission('products.create'), 403);
+
         $categories = ProductCategory::orderBy('name')->get();
 
         return view('products.create', compact('categories'));
@@ -37,6 +41,8 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->hasPermission('products.create'), 403);
+
         $validated = $request->validate([
             'product_category_id' => 'required|exists:product_categories,id',
             'name' => 'required|string|max:255',
@@ -53,6 +59,8 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
+        abort_unless(auth()->user()->hasPermission('products.view'), 403);
+
         $product->load('category');
 
         return view('products.show', compact('product'));
@@ -60,6 +68,8 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
+        abort_unless(auth()->user()->hasPermission('products.edit'), 403);
+
         $categories = ProductCategory::orderBy('name')->get();
 
         return view('products.edit', compact('product', 'categories'));
@@ -67,6 +77,8 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
+        abort_unless(auth()->user()->hasPermission('products.edit'), 403);
+
         $validated = $request->validate([
             'product_category_id' => 'required|exists:product_categories,id',
             'name' => 'required|string|max:255',
@@ -83,6 +95,8 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
+        abort_unless(auth()->user()->hasPermission('products.delete'), 403);
+
         $product->delete();
 
         return redirect()

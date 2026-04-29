@@ -9,9 +9,11 @@
             <p class="mb-0 text-muted small">Kelola role user aplikasi dari halaman ini.</p>
         </div>
 
-        <a href="{{ route('roles.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-            <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Role
-        </a>
+        @if(auth()->user()->hasPermission('roles.manage'))
+            <a href="{{ route('roles.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Role
+            </a>
+        @endif
     </div>
 
     @if (session('success'))
@@ -64,18 +66,20 @@
                                     Detail
                                 </a>
 
-                                <a class="dropdown-item" href="{{ route('roles.edit', $role->id) }}">
-                                    Edit
-                                </a>
+                                @if(auth()->user()->hasPermission('roles.manage'))
+                                    <a class="dropdown-item" href="{{ route('roles.edit', $role->id) }}">
+                                        Edit
+                                    </a>
 
-                                <form action="{{ route('roles.destroy', $role->id) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="dropdown-item text-danger"
-                                        onclick="return confirm('Yakin hapus role ini?')">
-                                        Hapus
-                                    </button>
-                                </form>
+                                    <form action="{{ route('roles.destroy', $role->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="dropdown-item text-danger"
+                                            onclick="return confirm('Yakin hapus role ini?')">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         </div>
                     </td>

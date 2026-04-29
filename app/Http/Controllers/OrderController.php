@@ -14,6 +14,8 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
+        abort_unless(auth()->user()->hasPermission('orders.view'), 403);
+
         $search = $request->search;
         $status = $request->status;
 
@@ -38,12 +40,15 @@ class OrderController extends Controller
 
     public function create()
     {
+        abort_unless(auth()->user()->hasPermission('orders.create'), 403);
+
         return view('orders.create');
     }
 
     // STEP 1: customer + auto date
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->hasPermission('orders.create'), 403);
         $validated = $request->validate([
             'customer_id'      => 'nullable|exists:customers,id',
             'customer_nik'     => 'required|string|max:255',
@@ -90,6 +95,7 @@ class OrderController extends Controller
     // STEP 2: show add items form
     public function showItems(Order $order)
     {
+        abort_unless(auth()->user()->hasPermission('orders.create'), 403);
         $order->load(['customer', 'orderDetails.product.category']);
         $products = Product::with('category')->orderBy('name')->get();
 
@@ -99,6 +105,7 @@ class OrderController extends Controller
     // STEP 2: save items, redirect to payment (or suspend to index)
     public function storeItems(Request $request, Order $order)
     {
+        abort_unless(auth()->user()->hasPermission('orders.create'), 403);
         $validated = $request->validate([
             'items'              => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
@@ -147,6 +154,7 @@ class OrderController extends Controller
     // STEP 3: show payment form
     public function showPayment(Order $order)
     {
+        abort_unless(auth()->user()->hasPermission('orders.create'), 403);
         $order->load(['customer', 'orderDetails.product.category', 'payments']);
 
         return view('orders.payment', compact('order'));
@@ -155,6 +163,7 @@ class OrderController extends Controller
     // STEP 3: process payment or suspend with saved tax
     public function processPayment(Request $request, Order $order)
     {
+        abort_unless(auth()->user()->hasPermission('orders.create'), 403);
         $action = $request->input('action', 'pay');
 
         $validated = $request->validate([
@@ -223,6 +232,8 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
+        abort_unless(auth()->user()->hasPermission('orders.view'), 403);
+
         $order->load([
             'customer',
             'user',
@@ -235,6 +246,8 @@ class OrderController extends Controller
 
     public function edit(Order $order)
     {
+        abort_unless(auth()->user()->hasPermission('orders.edit'), 403);
+
         $order->load(['customer', 'orderDetails.product.category', 'payments']);
 
         return view('orders.edit', compact('order'));
@@ -242,6 +255,8 @@ class OrderController extends Controller
 
     public function update(Request $request, Order $order)
     {
+        abort_unless(auth()->user()->hasPermission('orders.edit'), 403);
+
         $validated = $request->validate([
             'status' => 'required|in:pending,paid,cancelled',
         ]);
@@ -316,6 +331,8 @@ class OrderController extends Controller
 
     public function destroy(Order $order)
     {
+        abort_unless(auth()->user()->hasPermission('orders.delete'), 403);
+
         DB::transaction(function () use ($order) {
             $order->load('orderDetails');
 

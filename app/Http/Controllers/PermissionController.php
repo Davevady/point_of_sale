@@ -9,6 +9,8 @@ class PermissionController extends Controller
 {
     public function index(Request $request)
     {
+        abort_unless(auth()->user()->hasPermission('permissions.view'), 403);
+
         $search = $request->search;
         $group  = $request->group;
 
@@ -29,6 +31,8 @@ class PermissionController extends Controller
 
     public function create()
     {
+        abort_unless(auth()->user()->hasPermission('permissions.manage'), 403);
+
         $groups = Permission::select('group')->distinct()->orderBy('group')->pluck('group');
 
         return view('permissions.create', compact('groups'));
@@ -36,6 +40,8 @@ class PermissionController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->hasPermission('permissions.manage'), 403);
+
         $validated = $request->validate([
             'name'  => 'required|string|max:255|unique:permissions,name',
             'label' => 'nullable|string|max:255',
@@ -49,6 +55,8 @@ class PermissionController extends Controller
 
     public function edit(Permission $permission)
     {
+        abort_unless(auth()->user()->hasPermission('permissions.manage'), 403);
+
         $groups = Permission::select('group')->distinct()->orderBy('group')->pluck('group');
 
         return view('permissions.edit', compact('permission', 'groups'));
@@ -56,6 +64,8 @@ class PermissionController extends Controller
 
     public function update(Request $request, Permission $permission)
     {
+        abort_unless(auth()->user()->hasPermission('permissions.manage'), 403);
+
         $validated = $request->validate([
             'name'  => 'required|string|max:255|unique:permissions,name,' . $permission->id,
             'label' => 'nullable|string|max:255',
@@ -69,6 +79,8 @@ class PermissionController extends Controller
 
     public function destroy(Permission $permission)
     {
+        abort_unless(auth()->user()->hasPermission('permissions.manage'), 403);
+
         $permission->delete();
 
         return redirect()->route('permissions.index')->with('success', 'Permission berhasil dihapus.');

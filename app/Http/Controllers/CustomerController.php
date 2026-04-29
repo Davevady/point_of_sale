@@ -13,6 +13,8 @@ class CustomerController extends Controller
      */
     public function index(Request $request)
     {
+        abort_unless(auth()->user()->hasPermission('customers.view'), 403);
+
         $search = $request->search;
 
         $customers = Customer::query()
@@ -61,6 +63,8 @@ class CustomerController extends Controller
      */
     public function create()
     {
+        abort_unless(auth()->user()->hasPermission('customers.create'), 403);
+
         return view('customers.create');
     }
 
@@ -69,6 +73,7 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->hasPermission('customers.create'), 403);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
@@ -94,6 +99,8 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer)
     {
+        abort_unless(auth()->user()->hasPermission('customers.view'), 403);
+
         return view('customers.show', compact('customer'));
     }
 
@@ -102,6 +109,8 @@ class CustomerController extends Controller
      */
     public function edit(Customer $customer)
     {
+        abort_unless(auth()->user()->hasPermission('customers.edit'), 403);
+
         return view('customers.edit', compact('customer'));
     }
 
@@ -110,6 +119,7 @@ class CustomerController extends Controller
      */
     public function update(Request $request, Customer $customer)
     {
+        abort_unless(auth()->user()->hasPermission('customers.edit'), 403);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
@@ -139,6 +149,8 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer)
     {
+        abort_unless(auth()->user()->hasPermission('customers.delete'), 403);
+
         if ($customer->doc_kk && Storage::disk('public')->exists($customer->doc_kk)) {
             Storage::disk('public')->delete($customer->doc_kk);
         }

@@ -29,7 +29,7 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            return redirect()->intended(route('users.index'));
+            return redirect()->intended(route('dashboard'));
         }
 
         return back()->withErrors([
@@ -59,7 +59,7 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('users.index')->with('success', 'Registrasi berhasil.');
+        return redirect()->route('dashboard')->with('success', 'Registrasi berhasil.');
     }
 
     public function logout(Request $request)

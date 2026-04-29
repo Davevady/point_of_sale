@@ -57,4 +57,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class);
     }
+
+    public function hasPermission(string $permission): bool
+    {
+        return $this->role?->hasPermission($permission) ?? false;
+    }
 }

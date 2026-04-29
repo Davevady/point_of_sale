@@ -19,16 +19,16 @@ class UserSeeder extends Seeder
                 'role' => 'Admin',
             ],
             [
-                'name' => 'Kasir User',
-                'email' => 'kasir@example.com',
+                'name' => 'Sales User',
+                'email' => 'sales@example.com',
                 'password' => Hash::make('password'),
-                'role' => 'Kasir',
+                'role' => 'Sales',
             ],
             [
-                'name' => 'Owner User',
-                'email' => 'owner@example.com',
+                'name' => 'Head Office User',
+                'email' => 'headoffice@example.com',
                 'password' => Hash::make('password'),
-                'role' => 'Owner',
+                'role' => 'Head Office',
             ],
         ];
 
