@@ -55,9 +55,9 @@
                                                 Login
                                             </a>
 
-                                            <a href="{{ route('register') }}" class="btn btn-success btn-user btn-block">
+                                            {{-- <a href="{{ route('register') }}" class="btn btn-success btn-user btn-block">
                                                 Daftar
-                                            </a>
+                                            </a> --}}
                                         @endauth
                                     </div>
 
