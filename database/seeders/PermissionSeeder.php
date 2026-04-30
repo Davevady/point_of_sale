@@ -12,10 +12,11 @@ class PermissionSeeder extends Seeder
     {
         $permissions = [
             // Orders
-            ['name' => 'orders.view',   'label' => 'Lihat Order',   'group' => 'Orders'],
-            ['name' => 'orders.create', 'label' => 'Buat Order',    'group' => 'Orders'],
-            ['name' => 'orders.edit',   'label' => 'Edit Order',    'group' => 'Orders'],
-            ['name' => 'orders.delete', 'label' => 'Hapus Order',   'group' => 'Orders'],
+            ['name' => 'orders.view',    'label' => 'Lihat Order',    'group' => 'Orders'],
+            ['name' => 'orders.create',  'label' => 'Buat Order',     'group' => 'Orders'],
+            ['name' => 'orders.edit',    'label' => 'Edit Order',     'group' => 'Orders'],
+            ['name' => 'orders.delete',  'label' => 'Hapus Order',    'group' => 'Orders'],
+            ['name' => 'orders.approve', 'label' => 'Approve Order',  'group' => 'Orders'],
 
             // Products
             ['name' => 'products.view',   'label' => 'Lihat Produk',   'group' => 'Products'],
@@ -75,9 +76,9 @@ class PermissionSeeder extends Seeder
             ],
 
             'Head Office' => [
-                'orders.view',
+                'orders.view', 'orders.create', 'orders.approve',
                 'products.view',
-                'customers.view',
+                'customers.view', 'customers.create', 'customers.edit',
                 'categories.view',
                 'users.view',
                 'roles.view',

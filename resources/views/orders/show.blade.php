@@ -38,8 +38,31 @@
 
             <div class="row mb-2">
                 <div class="col-md-3 font-weight-bold">Status</div>
-                <div class="col-md-9">{{ ucfirst($order->status) }}</div>
+                <div class="col-md-9">
+                    <span class="badge {{ $order->status_badge }}">{{ $order->status_label }}</span>
+                </div>
             </div>
+
+            @if ($order->approved_at)
+                <div class="row mb-2">
+                    <div class="col-md-3 font-weight-bold">
+                        {{ $order->status === 'rejected' ? 'Ditolak oleh' : 'Disetujui oleh' }}
+                    </div>
+                    <div class="col-md-9">{{ $order->approvedBy->name ?? '-' }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-3 font-weight-bold">
+                        {{ $order->status === 'rejected' ? 'Waktu Penolakan' : 'Waktu Approval' }}
+                    </div>
+                    <div class="col-md-9">{{ $order->approved_at->format('d M Y H:i') }}</div>
+                </div>
+                @if ($order->rejection_note)
+                    <div class="row mb-2">
+                        <div class="col-md-3 font-weight-bold">Catatan Penolakan</div>
+                        <div class="col-md-9 text-danger">{{ $order->rejection_note }}</div>
+                    </div>
+                @endif
+            @endif
 
             <div class="row mb-2">
                 <div class="col-md-3 font-weight-bold">Total Amount</div>

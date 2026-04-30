@@ -15,7 +15,8 @@ class CustomerController extends Controller
     {
         abort_unless(auth()->user()->hasPermission('customers.view'), 403);
 
-        $search = $request->search;
+        $search  = $request->search;
+        $perPage = in_array((int) $request->per_page, [10, 25, 50, 100]) ? (int) $request->per_page : 10;
 
         $customers = Customer::query()
             ->when($search, function ($query) use ($search) {
@@ -26,9 +27,10 @@ class CustomerController extends Controller
                 });
             })
             ->latest()
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
-        return view('customers.index', compact('customers', 'search'));
+        return view('customers.index', compact('customers', 'search', 'perPage'));
     }
 
     public function findByNik(Request $request)

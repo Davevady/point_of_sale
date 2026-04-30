@@ -21,6 +21,7 @@
     @endif
 
     <x-filter-bar :action="route('users.index')">
+        <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
         <div class="col-md-4 col-sm-12">
             <x-filter-input name="search" label="Search" placeholder="Cari nama atau email..." :value="request('search')" />
         </div>
@@ -30,7 +31,7 @@
         </div>
     </x-filter-bar>
 
-    <x-data-table title="Daftar User" subtitle="Total user: {{ $users->count() }}">
+    <x-data-table title="Daftar User" :paginator="$users" :per-page="$perPage">
         <thead class="thead-light">
             <tr>
                 <th width="80">No</th>
@@ -44,9 +45,9 @@
         </thead>
 
         <tbody>
-            @forelse ($users as $index => $user)
+            @forelse ($users as $user)
                 <tr>
-                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $users->firstItem() + $loop->index }}</td>
                     <td>{{ $user->name }}</td>
                     <td>{{ $user->role->name ?? '-' }}</td>
                     <td>{{ $user->email }}</td>

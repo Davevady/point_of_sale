@@ -5,17 +5,19 @@
 @section('content')
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Pembayaran</h1>
-        <a href="{{ route('orders.items', $order) }}" class="btn btn-sm btn-secondary shadow-sm">
-            <i class="fas fa-arrow-left mr-1"></i> Kembali ke Produk
+        <a href="{{ route('orders.index') }}" class="btn btn-sm btn-secondary shadow-sm">
+            <i class="fas fa-arrow-left mr-1"></i> Kembali ke Daftar
         </a>
     </div>
 
     <div class="d-flex align-items-center mb-4 small font-weight-bold">
-        <span class="badge badge-success px-3 py-2">1. Data Customer <i class="fas fa-check ml-1"></i></span>
+        <span class="badge badge-success px-3 py-2">1. Data Order <i class="fas fa-check ml-1"></i></span>
         <div class="mx-2" style="height:2px;width:40px;background:#1cc88a;"></div>
         <span class="badge badge-success px-3 py-2">2. Produk <i class="fas fa-check ml-1"></i></span>
         <div class="mx-2" style="height:2px;width:40px;background:#1cc88a;"></div>
-        <span class="badge badge-primary px-3 py-2">3. Pembayaran</span>
+        <span class="badge badge-success px-3 py-2">3. Approval HO <i class="fas fa-check ml-1"></i></span>
+        <div class="mx-2" style="height:2px;width:40px;background:#1cc88a;"></div>
+        <span class="badge badge-primary px-3 py-2">4. Pembayaran</span>
     </div>
 
     @if (session('success'))

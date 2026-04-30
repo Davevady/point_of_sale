@@ -11,22 +11,24 @@ class PermissionController extends Controller
     {
         abort_unless(auth()->user()->hasPermission('permissions.view'), 403);
 
-        $search = $request->search;
-        $group  = $request->group;
+        $search  = $request->search;
+        $group   = $request->group;
+        $perPage = in_array((int) $request->per_page, [10, 25, 50, 100]) ? (int) $request->per_page : 10;
 
         $permissions = Permission::query()
-            ->when($search, fn($q) => $q->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('label', 'like', "%{$search}%");
+            ->when($search, fn ($q) => $q->where(function ($q2) use ($search) {
+                $q2->where('name', 'like', "%{$search}%")
+                   ->orWhere('label', 'like', "%{$search}%");
             }))
-            ->when($group, fn($q) => $q->where('group', $group))
+            ->when($group, fn ($q) => $q->where('group', $group))
             ->orderBy('group')
             ->orderBy('name')
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
         $groups = Permission::select('group')->distinct()->orderBy('group')->pluck('group');
 
-        return view('permissions.index', compact('permissions', 'search', 'group', 'groups'));
+        return view('permissions.index', compact('permissions', 'search', 'group', 'groups', 'perPage'));
     }
 
     public function create()

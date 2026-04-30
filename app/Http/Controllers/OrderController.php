@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Payment;
 use App\Models\Product;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -16,26 +17,58 @@ class OrderController extends Controller
     {
         abort_unless(auth()->user()->hasPermission('orders.view'), 403);
 
-        $search = $request->search;
-        $status = $request->status;
+        $search  = $request->search;
+        $status  = $request->status;
+        $perPage = in_array((int) $request->per_page, [10, 25, 50, 100]) ? (int) $request->per_page : 10;
+
+        $activePeriod = null;
+        $from         = null;
+        $to           = null;
+
+        if ($request->period === '1d') {
+            $from         = now()->startOfDay();
+            $to           = now()->endOfDay();
+            $activePeriod = '1d';
+        } elseif ($request->period === '7d') {
+            $from         = now()->subDays(6)->startOfDay();
+            $to           = now()->endOfDay();
+            $activePeriod = '7d';
+        } elseif ($request->period === '30d') {
+            $from         = now()->subDays(29)->startOfDay();
+            $to           = now()->endOfDay();
+            $activePeriod = '30d';
+        } elseif ($request->filled('from') && $request->filled('to')) {
+            $from         = Carbon::parse($request->from)->startOfDay();
+            $to           = Carbon::parse($request->to)->endOfDay();
+            $activePeriod = 'custom';
+        }
 
         $orders = Order::with(['customer', 'user', 'payments'])
             ->withCount('orderDetails')
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('invoice_num', 'like', "%{$search}%")
-                        ->orWhereHas('customer', function ($q2) use ($search) {
-                            $q2->where('name', 'like', "%{$search}%");
-                        });
+            ->when($search, function ($q) use ($search) {
+                $q->where(function ($q2) use ($search) {
+                    $q2->where('invoice_num', 'like', "%{$search}%")
+                       ->orWhereHas('customer', fn ($q3) => $q3->where('name', 'like', "%{$search}%"));
                 });
             })
-            ->when($status, function ($query) use ($status) {
-                $query->where('status', $status);
-            })
-            ->latest()
-            ->get();
+            ->when($status, fn ($q) => $q->where('status', $status))
+            ->when($from && $to, fn ($q) => $q->whereBetween('order_date', [$from, $to]))
+            ->orderByRaw("CASE status
+                WHEN 'pending'          THEN 1
+                WHEN 'pending_approval' THEN 2
+                WHEN 'approved'         THEN 3
+                WHEN 'paid'             THEN 4
+                WHEN 'rejected'         THEN 5
+                WHEN 'cancelled'        THEN 6
+                ELSE 7
+            END")
+            ->orderBy('order_date', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
 
-        return view('orders.index', compact('orders', 'search', 'status'));
+        return view('orders.index', compact(
+            'orders', 'search', 'status', 'perPage', 'activePeriod', 'from', 'to'
+        ));
     }
 
     public function create()
@@ -96,16 +129,26 @@ class OrderController extends Controller
     public function showItems(Order $order)
     {
         abort_unless(auth()->user()->hasPermission('orders.create'), 403);
+        abort_if(
+            in_array($order->status, ['pending_approval', 'approved', 'paid', 'cancelled']),
+            403,
+            'Item tidak dapat diedit pada status saat ini.'
+        );
         $order->load(['customer', 'orderDetails.product.category']);
         $products = Product::with('category')->orderBy('name')->get();
 
         return view('orders.items', compact('order', 'products'));
     }
 
-    // STEP 2: save items, redirect to payment (or suspend to index)
+    // STEP 2: save items, then submit for HO approval (or suspend to index)
     public function storeItems(Request $request, Order $order)
     {
         abort_unless(auth()->user()->hasPermission('orders.create'), 403);
+        abort_if(
+            in_array($order->status, ['pending_approval', 'approved', 'paid', 'cancelled']),
+            403,
+            'Item tidak dapat diedit pada status saat ini.'
+        );
         $validated = $request->validate([
             'items'              => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
@@ -146,24 +189,80 @@ class OrderController extends Controller
                 ->with('success', 'Order tersimpan sebagai draft.');
         }
 
+        // action = submit → kirim ke Head Office untuk approval
+        $order->update([
+            'status'         => 'pending_approval',
+            'approved_by'    => null,
+            'approved_at'    => null,
+            'rejection_note' => null,
+        ]);
+
         return redirect()
-            ->route('orders.payment', $order)
-            ->with('success', 'Item produk berhasil disimpan.');
+            ->route('orders.index')
+            ->with('success', 'Order berhasil disubmit. Menunggu approval Head Office.');
     }
 
-    // STEP 3: show payment form
+    // STEP 3: Head Office review & approve/reject
+    public function showApproval(Order $order)
+    {
+        abort_unless(auth()->user()->hasPermission('orders.approve'), 403);
+        abort_unless($order->status === 'pending_approval', 403);
+
+        $order->load(['customer', 'orderDetails.product.category', 'user']);
+
+        return view('orders.approve', compact('order'));
+    }
+
+    public function processApproval(Request $request, Order $order)
+    {
+        abort_unless(auth()->user()->hasPermission('orders.approve'), 403);
+        abort_unless($order->status === 'pending_approval', 403);
+
+        $validated = $request->validate([
+            'action'         => 'required|in:approve,reject',
+            'rejection_note' => 'required_if:action,reject|nullable|string|max:500',
+        ]);
+
+        if ($validated['action'] === 'approve') {
+            $order->update([
+                'status'         => 'approved',
+                'approved_by'    => auth()->id(),
+                'approved_at'    => now(),
+                'rejection_note' => null,
+            ]);
+
+            return redirect()
+                ->route('orders.index')
+                ->with('success', 'Order berhasil disetujui.');
+        }
+
+        $order->update([
+            'status'         => 'rejected',
+            'approved_by'    => auth()->id(),
+            'approved_at'    => now(),
+            'rejection_note' => $validated['rejection_note'],
+        ]);
+
+        return redirect()
+            ->route('orders.index')
+            ->with('success', 'Order telah ditolak.');
+    }
+
+    // STEP 4: show payment form (hanya untuk order yang sudah approved)
     public function showPayment(Order $order)
     {
         abort_unless(auth()->user()->hasPermission('orders.create'), 403);
+        abort_unless($order->status === 'approved', 403);
         $order->load(['customer', 'orderDetails.product.category', 'payments']);
 
         return view('orders.payment', compact('order'));
     }
 
-    // STEP 3: process payment or suspend with saved tax
+    // STEP 4: process payment or suspend with saved tax
     public function processPayment(Request $request, Order $order)
     {
         abort_unless(auth()->user()->hasPermission('orders.create'), 403);
+        abort_unless($order->status === 'approved', 403);
         $action = $request->input('action', 'pay');
 
         $validated = $request->validate([

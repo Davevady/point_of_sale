@@ -29,12 +29,13 @@
     @endif
 
     <x-filter-bar :action="route('roles.index')">
+        <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
         <div class="col-md-4 col-sm-12">
             <x-filter-input name="search" label="Search" placeholder="Cari nama role..." :value="request('search')" />
         </div>
     </x-filter-bar>
 
-    <x-data-table title="Daftar Role" subtitle="Total role: {{ $roles->count() }}">
+    <x-data-table title="Daftar Role" :paginator="$roles" :per-page="$perPage">
         <thead class="thead-light">
             <tr>
                 <th width="80">No</th>
@@ -45,9 +46,9 @@
         </thead>
 
         <tbody>
-            @forelse ($roles as $index => $role)
+            @forelse ($roles as $role)
                 <tr>
-                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $roles->firstItem() + $loop->index }}</td>
                     <td>{{ $role->name }}</td>
                     <td>
                         <a href="{{ route('users.index', ['role' => $role->id]) }}" class="font-weight-bold text-primary">

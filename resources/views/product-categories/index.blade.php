@@ -21,13 +21,14 @@
     @endif
 
     <x-filter-bar :action="route('product-categories.index')">
+        <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
         <div class="col-md-4 col-sm-12">
             <x-filter-input name="search" label="Search" placeholder="Cari nama atau deskripsi kategori..."
                 :value="request('search')" />
         </div>
     </x-filter-bar>
 
-    <x-data-table title="Daftar Kategori Produk" subtitle="Total kategori: {{ $productCategories->count() }}">
+    <x-data-table title="Daftar Kategori Produk" :paginator="$productCategories" :per-page="$perPage">
         <thead class="thead-light">
             <tr>
                 <th width="70">No</th>
@@ -38,9 +39,9 @@
         </thead>
 
         <tbody>
-            @forelse ($productCategories as $index => $productCategory)
+            @forelse ($productCategories as $productCategory)
                 <tr>
-                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $productCategories->firstItem() + $loop->index }}</td>
                     <td>{{ $productCategory->name }}</td>
                     <td>
                         <a href="{{ route('products.index', ['category' => $productCategory->id]) }}"

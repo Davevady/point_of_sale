@@ -12,22 +12,20 @@ class ProductController extends Controller
     {
         abort_unless(auth()->user()->hasPermission('products.view'), 403);
 
-        $search = $request->search;
+        $search   = $request->search;
         $category = $request->category;
+        $perPage  = in_array((int) $request->per_page, [10, 25, 50, 100]) ? (int) $request->per_page : 10;
 
         $products = Product::with('category')
-            ->when($search, function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
-            ->when($category, function ($query) use ($category) {
-                $query->where('product_category_id', $category);
-            })
+            ->when($search, fn ($q) => $q->where('name', 'like', "%{$search}%"))
+            ->when($category, fn ($q) => $q->where('product_category_id', $category))
             ->latest()
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
         $categories = ProductCategory::orderBy('name')->get();
 
-        return view('products.index', compact('products', 'categories', 'search', 'category'));
+        return view('products.index', compact('products', 'categories', 'search', 'category', 'perPage'));
     }
 
     public function create()

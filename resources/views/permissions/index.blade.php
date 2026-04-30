@@ -23,6 +23,7 @@
     @endif
 
     <x-filter-bar :action="route('permissions.index')">
+        <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
         <div class="col-md-4 col-sm-12">
             <x-filter-input
                 name="search"
@@ -45,7 +46,7 @@
         </div>
     </x-filter-bar>
 
-    <x-data-table title="Daftar Permissions" subtitle="Total: {{ $permissions->count() }} permission">
+    <x-data-table title="Daftar Permissions" :paginator="$permissions" :per-page="$perPage">
         <thead class="thead-light">
             <tr>
                 <th width="80">No</th>
@@ -57,9 +58,9 @@
         </thead>
 
         <tbody>
-            @forelse ($permissions as $index => $permission)
+            @forelse ($permissions as $permission)
                 <tr>
-                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $permissions->firstItem() + $loop->index }}</td>
                     <td>
                         <code class="text-primary">{{ $permission->name }}</code>
                     </td>

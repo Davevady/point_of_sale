@@ -17,11 +17,41 @@ class Order extends Model
         'tax_type',
         'tax_value',
         'status',
+        'approved_by',
+        'approved_at',
+        'rejection_note',
     ];
 
     protected $casts = [
-        'order_date' => 'datetime',
+        'order_date'  => 'datetime',
+        'approved_at' => 'datetime',
     ];
+
+    public function getStatusLabelAttribute(): string
+    {
+        return match ($this->status) {
+            'pending'          => 'Pending',
+            'pending_approval' => 'Menunggu Approval',
+            'approved'         => 'Disetujui',
+            'rejected'         => 'Ditolak',
+            'paid'             => 'Lunas',
+            'cancelled'        => 'Dibatalkan',
+            default            => ucfirst($this->status),
+        };
+    }
+
+    public function getStatusBadgeAttribute(): string
+    {
+        return match ($this->status) {
+            'paid'             => 'badge-success',
+            'pending'          => 'badge-warning',
+            'pending_approval' => 'badge-info',
+            'approved'         => 'badge-primary',
+            'rejected'         => 'badge-danger',
+            'cancelled'        => 'badge-secondary',
+            default            => 'badge-light',
+        };
+    }
 
     public function user()
     {
@@ -41,5 +71,10 @@ class Order extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 }

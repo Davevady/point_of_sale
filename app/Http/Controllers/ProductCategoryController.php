@@ -11,17 +11,17 @@ class ProductCategoryController extends Controller
     {
         abort_unless(auth()->user()->hasPermission('categories.view'), 403);
 
-        $search = $request->search;
+        $search  = $request->search;
+        $perPage = in_array((int) $request->per_page, [10, 25, 50, 100]) ? (int) $request->per_page : 10;
 
         $productCategories = ProductCategory::query()
             ->withCount('products')
-            ->when($search, function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
+            ->when($search, fn ($q) => $q->where('name', 'like', "%{$search}%"))
             ->latest()
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
-        return view('product-categories.index', compact('productCategories', 'search'));
+        return view('product-categories.index', compact('productCategories', 'search', 'perPage'));
     }
 
     public function create()

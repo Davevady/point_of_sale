@@ -12,16 +12,16 @@ class RoleController extends Controller
     {
         abort_unless(auth()->user()->hasPermission('roles.view'), 403);
 
-        $search = $request->search;
+        $search  = $request->search;
+        $perPage = in_array((int) $request->per_page, [10, 25, 50, 100]) ? (int) $request->per_page : 10;
 
         $roles = Role::query()
-            ->when($search, function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
+            ->when($search, fn ($q) => $q->where('name', 'like', "%{$search}%"))
             ->latest()
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
-        return view('roles.index', compact('roles', 'search'));
+        return view('roles.index', compact('roles', 'search', 'perPage'));
     }
 
     public function create()

@@ -38,6 +38,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('orders', OrderController::class);
     Route::get('orders/{order}/items', [OrderController::class, 'showItems'])->name('orders.items');
     Route::post('orders/{order}/items', [OrderController::class, 'storeItems'])->name('orders.storeItems');
+    Route::get('orders/{order}/approve', [OrderController::class, 'showApproval'])->name('orders.approve');
+    Route::post('orders/{order}/approve', [OrderController::class, 'processApproval'])->name('orders.processApproval');
     Route::get('orders/{order}/payment', [OrderController::class, 'showPayment'])->name('orders.payment');
     Route::post('orders/{order}/payment', [OrderController::class, 'processPayment'])->name('orders.processPayment');
 });

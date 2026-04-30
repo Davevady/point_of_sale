@@ -13,7 +13,9 @@
         <div class="mx-2" style="height:2px;width:40px;background:#1cc88a;"></div>
         <span class="badge badge-primary px-3 py-2">2. Produk</span>
         <div class="mx-2" style="height:2px;width:40px;background:#d1d3e2;"></div>
-        <span class="badge badge-light px-3 py-2 text-muted">3. Pembayaran</span>
+        <span class="badge badge-light px-3 py-2 text-muted">3. Approval HO</span>
+        <div class="mx-2" style="height:2px;width:40px;background:#d1d3e2;"></div>
+        <span class="badge badge-light px-3 py-2 text-muted">4. Pembayaran</span>
     </div>
 
     @if (session('success'))
@@ -149,8 +151,8 @@
                             <button type="submit" name="action" value="suspend" class="btn btn-secondary">
                                 <i class="fas fa-pause mr-1"></i> Simpan & Tunda
                             </button>
-                            <button type="submit" name="action" value="continue" class="btn btn-primary">
-                                Lanjut: Pembayaran <i class="fas fa-arrow-right ml-1"></i>
+                            <button type="submit" name="action" value="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane mr-1"></i> Submit untuk Approval
                             </button>
                         </div>
                     </form>

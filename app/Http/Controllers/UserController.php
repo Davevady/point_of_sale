@@ -13,8 +13,9 @@ class UserController extends Controller
     {
         abort_unless(auth()->user()->hasPermission('users.view'), 403);
 
-        $search = $request->search;
-        $role = $request->role;
+        $search  = $request->search;
+        $role    = $request->role;
+        $perPage = in_array((int) $request->per_page, [10, 25, 50, 100]) ? (int) $request->per_page : 10;
 
         $users = User::with('role')
             ->when($search, function ($query) use ($search) {
@@ -23,15 +24,14 @@ class UserController extends Controller
                         ->orWhere('email', 'like', "%{$search}%");
                 });
             })
-            ->when($role, function ($query) use ($role) {
-                $query->where('role_id', $role);
-            })
+            ->when($role, fn ($q) => $q->where('role_id', $role))
             ->latest()
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
         $roles = Role::orderBy('name')->get();
 
-        return view('users.index', compact('users', 'roles', 'search', 'role'));
+        return view('users.index', compact('users', 'roles', 'search', 'role', 'perPage'));
     }
 
     public function create()
