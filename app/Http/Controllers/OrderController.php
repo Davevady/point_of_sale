@@ -21,26 +21,24 @@ class OrderController extends Controller
         $status  = $request->status;
         $perPage = in_array((int) $request->per_page, [10, 25, 50, 100]) ? (int) $request->per_page : 10;
 
-        $activePeriod = null;
-        $from         = null;
-        $to           = null;
+        $activePeriod = $request->input('period', '1d');
 
-        if ($request->period === '1d') {
-            $from         = now()->startOfDay();
-            $to           = now()->endOfDay();
-            $activePeriod = '1d';
-        } elseif ($request->period === '7d') {
-            $from         = now()->subDays(6)->startOfDay();
-            $to           = now()->endOfDay();
-            $activePeriod = '7d';
-        } elseif ($request->period === '30d') {
-            $from         = now()->subDays(29)->startOfDay();
-            $to           = now()->endOfDay();
-            $activePeriod = '30d';
-        } elseif ($request->filled('from') && $request->filled('to')) {
-            $from         = Carbon::parse($request->from)->startOfDay();
-            $to           = Carbon::parse($request->to)->endOfDay();
+        $from = null;
+        $to   = null;
+
+        if ($request->filled('from') && $request->filled('to')) {
+            $from = Carbon::parse($request->from)->startOfDay();
+            $to   = Carbon::parse($request->to)->endOfDay();
             $activePeriod = 'custom';
+        } elseif ($activePeriod === '1d') {
+            $from = now()->startOfDay();
+            $to   = now()->endOfDay();
+        } elseif ($activePeriod === '7d') {
+            $from = now()->subDays(6)->startOfDay();
+            $to   = now()->endOfDay();
+        } elseif ($activePeriod === '30d') {
+            $from = now()->subDays(29)->startOfDay();
+            $to   = now()->endOfDay();
         }
 
         $orders = Order::with(['customer', 'user', 'payments'])
@@ -48,26 +46,23 @@ class OrderController extends Controller
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($q2) use ($search) {
                     $q2->where('invoice_num', 'like', "%{$search}%")
-                       ->orWhereHas('customer', fn ($q3) => $q3->where('name', 'like', "%{$search}%"));
+                        ->orWhereHas('customer', fn($q3) => $q3->where('name', 'like', "%{$search}%"));
                 });
             })
-            ->when($status, fn ($q) => $q->where('status', $status))
-            ->when($from && $to, fn ($q) => $q->whereBetween('order_date', [$from, $to]))
-            ->orderByRaw("CASE status
-                WHEN 'pending'          THEN 1
-                WHEN 'pending_approval' THEN 2
-                WHEN 'approved'         THEN 3
-                WHEN 'paid'             THEN 4
-                WHEN 'rejected'         THEN 5
-                WHEN 'cancelled'        THEN 6
-                ELSE 7
-            END")
+            ->when($status, fn($q) => $q->where('status', $status))
+            ->when($from && $to, fn($q) => $q->whereBetween('order_date', [$from, $to]))
             ->orderBy('order_date', 'desc')
             ->paginate($perPage)
             ->withQueryString();
 
         return view('orders.index', compact(
-            'orders', 'search', 'status', 'perPage', 'activePeriod', 'from', 'to'
+            'orders',
+            'search',
+            'status',
+            'perPage',
+            'activePeriod',
+            'from',
+            'to'
         ));
     }
 
