@@ -8,9 +8,11 @@
             <h1 class="h3 mb-0 text-gray-800">Orders</h1>
             <p class="mb-0 text-muted small">Kelola transaksi order dari halaman ini.</p>
         </div>
-        <a href="{{ route('orders.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-            <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Order
-        </a>
+        @if (auth()->user()->hasPermission('orders.create'))
+            <a href="{{ route('orders.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Order
+            </a>
+        @endif
     </div>
 
     @if (session('success'))
@@ -141,12 +143,12 @@
                     <td>Rp {{ number_format($order->grand_total, 0, ',', '.') }}</td>
                     <td class="text-center">
                         <div class="d-flex justify-content-center align-items-center" style="gap: 4px;">
-                            @if ($order->status === 'pending')
+                            @if ($order->status === 'pending' && auth()->user()->hasPermission('orders.create'))
                                 <a href="{{ route('orders.items', $order->id) }}"
                                     class="btn btn-warning btn-sm font-weight-bold" title="Lanjutkan: Tambah/Edit Produk">
                                     <i class="fas fa-play fa-xs mr-1"></i> Lanjutkan
                                 </a>
-                            @elseif ($order->status === 'rejected')
+                            @elseif ($order->status === 'rejected' && auth()->user()->hasPermission('orders.create'))
                                 <a href="{{ route('orders.items', $order->id) }}"
                                     class="btn btn-warning btn-sm font-weight-bold" title="Edit & Resubmit">
                                     <i class="fas fa-redo fa-xs mr-1"></i> Edit & Resubmit
@@ -170,15 +172,19 @@
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
                                     <a class="dropdown-item" href="{{ route('orders.show', $order->id) }}">Detail</a>
-                                    <a class="dropdown-item" href="{{ route('orders.edit', $order->id) }}">Edit</a>
-                                    <form action="{{ route('orders.destroy', $order->id) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="dropdown-item text-danger"
-                                            onclick="return confirm('Yakin hapus order ini?')">
-                                            Hapus
-                                        </button>
-                                    </form>
+                                    @if (auth()->user()->hasPermission('orders.edit'))
+                                        <a class="dropdown-item" href="{{ route('orders.edit', $order->id) }}">Edit</a>
+                                    @endif
+                                    @if (auth()->user()->hasPermission('orders.delete'))
+                                        <form action="{{ route('orders.destroy', $order->id) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="dropdown-item text-danger"
+                                                onclick="return confirm('Yakin hapus order ini?')">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </div>
                         </div>

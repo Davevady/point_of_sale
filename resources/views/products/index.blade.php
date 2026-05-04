@@ -9,9 +9,11 @@
             <p class="mb-0 text-muted small">Kelola data produk dari halaman ini.</p>
         </div>
 
-        <a href="{{ route('products.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-            <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Produk
-        </a>
+        @if (auth()->user()->hasPermission('products.create'))
+            <a href="{{ route('products.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Produk
+            </a>
+        @endif
     </div>
 
     @if (session('success'))
@@ -74,18 +76,22 @@
                                     Detail
                                 </a>
 
-                                <a class="dropdown-item" href="{{ route('products.edit', $product->id) }}">
-                                    Edit
-                                </a>
+                                @if (auth()->user()->hasPermission('products.edit'))
+                                    <a class="dropdown-item" href="{{ route('products.edit', $product->id) }}">
+                                        Edit
+                                    </a>
+                                @endif
 
-                                <form action="{{ route('products.destroy', $product->id) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="dropdown-item text-danger"
-                                        onclick="return confirm('Yakin hapus produk ini?')">
-                                        Hapus
-                                    </button>
-                                </form>
+                                @if (auth()->user()->hasPermission('products.delete'))
+                                    <form action="{{ route('products.destroy', $product->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="dropdown-item text-danger"
+                                            onclick="return confirm('Yakin hapus produk ini?')">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         </div>
                     </td>

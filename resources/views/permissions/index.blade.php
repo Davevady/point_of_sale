@@ -9,9 +9,11 @@
             <p class="mb-0 text-muted small">Kelola hak akses aplikasi dari halaman ini.</p>
         </div>
 
-        <a href="{{ route('permissions.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-            <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Permission
-        </a>
+        @if (auth()->user()->hasPermission('permissions.manage'))
+            <a href="{{ route('permissions.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Permission
+            </a>
+        @endif
     </div>
 
     @if (session('success'))
@@ -80,18 +82,20 @@
                             </button>
 
                             <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
-                                <a class="dropdown-item" href="{{ route('permissions.edit', $permission->id) }}">
-                                    Edit
-                                </a>
+                                @if (auth()->user()->hasPermission('permissions.manage'))
+                                    <a class="dropdown-item" href="{{ route('permissions.edit', $permission->id) }}">
+                                        Edit
+                                    </a>
 
-                                <form action="{{ route('permissions.destroy', $permission->id) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="dropdown-item text-danger"
-                                        onclick="return confirm('Yakin hapus permission \'{{ $permission->name }}\'?')">
-                                        Hapus
-                                    </button>
-                                </form>
+                                    <form action="{{ route('permissions.destroy', $permission->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="dropdown-item text-danger"
+                                            onclick="return confirm('Yakin hapus permission \'{{ $permission->name }}\'?')">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         </div>
                     </td>

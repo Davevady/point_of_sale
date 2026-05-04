@@ -9,9 +9,11 @@
             <p class="mb-0 text-muted small">Kelola data customer dari halaman ini.</p>
         </div>
 
-        <a href="{{ route('customers.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-            <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Customer
-        </a>
+        @if (auth()->user()->hasPermission('customers.create'))
+            <a href="{{ route('customers.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Customer
+            </a>
+        @endif
     </div>
 
     @if (session('success'))
@@ -80,18 +82,22 @@
                                     Detail
                                 </a>
 
-                                <a class="dropdown-item" href="{{ route('customers.edit', $customer->id) }}">
-                                    Edit
-                                </a>
+                                @if (auth()->user()->hasPermission('customers.edit'))
+                                    <a class="dropdown-item" href="{{ route('customers.edit', $customer->id) }}">
+                                        Edit
+                                    </a>
+                                @endif
 
-                                <form action="{{ route('customers.destroy', $customer->id) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="dropdown-item text-danger"
-                                        onclick="return confirm('Yakin hapus customer ini?')">
-                                        Hapus
-                                    </button>
-                                </form>
+                                @if (auth()->user()->hasPermission('customers.delete'))
+                                    <form action="{{ route('customers.destroy', $customer->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="dropdown-item text-danger"
+                                            onclick="return confirm('Yakin hapus customer ini?')">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         </div>
                     </td>

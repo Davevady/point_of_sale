@@ -9,9 +9,11 @@
             <p class="mb-0 text-muted small">Kelola akun user aplikasi dari halaman ini.</p>
         </div>
 
-        <a href="{{ route('users.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-            <i class="fas fa-plus fa-sm text-white-50"></i> Tambah User
-        </a>
+        @if (auth()->user()->hasPermission('users.create'))
+            <a href="{{ route('users.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-plus fa-sm text-white-50"></i> Tambah User
+            </a>
+        @endif
     </div>
 
     @if (session('success'))
@@ -62,10 +64,12 @@
                                 <a class="dropdown-item" href="{{ route('users.show', $user->id) }}">Detail
                                 </a>
 
-                                <a class="dropdown-item" href="{{ route('users.edit', $user->id) }}">Edit
-                                </a>
+                                @if (auth()->user()->hasPermission('users.edit'))
+                                    <a class="dropdown-item" href="{{ route('users.edit', $user->id) }}">Edit
+                                    </a>
+                                @endif
 
-                                @if (auth()->id() !== $user->id)
+                                @if (auth()->user()->hasPermission('users.delete') && auth()->id() !== $user->id)
                                     <form action="{{ route('users.destroy', $user->id) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
