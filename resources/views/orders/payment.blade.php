@@ -88,7 +88,7 @@
                         <div class="px-4 py-3 border-top">
                             <div class="row align-items-end mb-3">
                                 <div class="col-md-4">
-                                    <label class="small font-weight-bold text-muted mb-1">Tipe Pajak</label>
+                                    <label class="small font-weight-bold text-muted mb-1">Tipe Pajak <span class="text-danger">*</span></label>
                                     <select name="tax_type" id="tax_type" class="form-control form-control-sm">
                                         <option value="percent" {{ old('tax_type', $order->tax_type) === 'percent' ? 'selected' : '' }}>Persen (%)</option>
                                         <option value="amount" {{ old('tax_type', $order->tax_type) === 'amount' ? 'selected' : '' }}>Nominal (Rp)</option>
@@ -132,7 +132,7 @@
                         @php $payment = $order->payments->first(); @endphp
 
                         <div class="form-group">
-                            <label for="payment_method">Metode</label>
+                            <label for="payment_method">Metode <span class="text-danger">*</span></label>
                             <select name="payment_method" id="payment_method" class="form-control">
                                 <option value="cash" {{ old('payment_method', optional($payment)->payment_method ?? 'cash') == 'cash' ? 'selected' : '' }}>Cash</option>
                                 <option value="transfer" {{ old('payment_method', optional($payment)->payment_method) == 'transfer' ? 'selected' : '' }}>Transfer</option>

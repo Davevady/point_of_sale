@@ -86,7 +86,7 @@
                                 @foreach ($oldItems as $index => $item)
                                     <div class="row order-item mb-2">
                                         <div class="col-md-8">
-                                            <label>Produk</label>
+                                            <label>Produk <span class="text-danger">*</span></label>
                                             <x-searchable-product-select
                                                 name="items[{{ $index }}][product_id]"
                                                 placeholder="Pilih Produk"
@@ -95,7 +95,7 @@
                                             />
                                         </div>
                                         <div class="col-md-3">
-                                            <label>Qty</label>
+                                            <label>Qty <span class="text-danger">*</span></label>
                                             <input type="number" name="items[{{ $index }}][qty]"
                                                 class="form-control" min="1" value="{{ $item['qty'] ?? 1 }}">
                                         </div>
@@ -108,7 +108,7 @@
                                 @foreach ($order->orderDetails as $index => $detail)
                                     <div class="row order-item mb-2">
                                         <div class="col-md-8">
-                                            <label>Produk</label>
+                                            <label>Produk <span class="text-danger">*</span></label>
                                             <x-searchable-product-select
                                                 name="items[{{ $index }}][product_id]"
                                                 placeholder="Pilih Produk"
@@ -117,7 +117,7 @@
                                             />
                                         </div>
                                         <div class="col-md-3">
-                                            <label>Qty</label>
+                                            <label>Qty <span class="text-danger">*</span></label>
                                             <input type="number" name="items[{{ $index }}][qty]"
                                                 class="form-control" min="1" value="{{ $detail->qty }}">
                                         </div>
@@ -129,7 +129,7 @@
                             @else
                                 <div class="row order-item mb-2">
                                     <div class="col-md-8">
-                                        <label>Produk</label>
+                                        <label>Produk <span class="text-danger">*</span></label>
                                         <x-searchable-product-select
                                             name="items[0][product_id]"
                                             placeholder="Pilih Produk"
@@ -138,7 +138,7 @@
                                         />
                                     </div>
                                     <div class="col-md-4">
-                                        <label>Qty</label>
+                                        <label>Qty <span class="text-danger">*</span></label>
                                         <input type="number" name="items[0][qty]" class="form-control" min="1" value="1">
                                     </div>
                                 </div>
@@ -182,7 +182,7 @@
         const html = `
         <div class="row order-item mb-2">
             <div class="col-md-8">
-                <label>Produk</label>
+                <label>Produk <span class="text-danger">*</span></label>
                 <div class="form-group mb-0">
                     <div class="searchable-select-wrapper" id="${uid}" style="position:relative;">
                         <input type="hidden" name="items[${itemIndex}][product_id]" id="${uid}_val" value="">
@@ -203,7 +203,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <label>Qty</label>
+                <label>Qty <span class="text-danger">*</span></label>
                 <input type="number" name="items[${itemIndex}][qty]" class="form-control" min="1" value="1">
             </div>
             <div class="col-md-1 d-flex align-items-end">

@@ -19,7 +19,7 @@
                 @csrf
 
                 <div class="form-group">
-                    <label for="name">Nama</label>
+                    <label for="name">Nama <span class="text-danger">*</span></label>
                     <input type="text" name="name" id="name"
                         class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}"
                         placeholder="Masukkan nama">
@@ -29,7 +29,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="email">Email <span class="text-danger">*</span></label>
                     <input type="email" name="email" id="email"
                         class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}"
                         placeholder="Masukkan email">
@@ -39,7 +39,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <label for="password">Password <span class="text-danger">*</span></label>
                     <input type="password" name="password" id="password"
                         class="form-control @error('password') is-invalid @enderror" placeholder="Masukkan password">
                     @error('password')
@@ -49,7 +49,7 @@
 
                 <div class="form-group">
                     <x-filter-select name="role_id" label="Role" placeholder="Pilih role" :options="$roles"
-                        :value="old('role_id')" />
+                        :value="old('role_id')" :required="true" />
                     @error('role_id')
                         <div class="text-danger small mt-2">{{ $message }}</div>
                     @enderror

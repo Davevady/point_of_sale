@@ -26,6 +26,7 @@
                                 placeholder="Pilih kategori"
                                 :options="$categories"
                                 :value="old('product_category_id')"
+                                :required="true"
                             />
                             @error('product_category_id')
                                 <div class="text-danger small mt-1">{{ $message }}</div>
@@ -35,7 +36,7 @@
 
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="name">Nama Produk</label>
+                            <label for="name">Nama Produk <span class="text-danger">*</span></label>
                             <input type="text" name="name" id="name"
                                 class="form-control @error('name') is-invalid @enderror"
                                 value="{{ old('name') }}" placeholder="Masukkan nama produk">
@@ -49,7 +50,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="price">Harga</label>
+                            <label for="price">Harga <span class="text-danger">*</span></label>
                             <input type="number" name="price" id="price"
                                 class="form-control @error('price') is-invalid @enderror"
                                 value="{{ old('price') }}" min="0" placeholder="Masukkan harga">
@@ -61,7 +62,7 @@
 
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="stock">Stock</label>
+                            <label for="stock">Stock <span class="text-danger">*</span></label>
                             <input type="number" name="stock" id="stock"
                                 class="form-control @error('stock') is-invalid @enderror"
                                 value="{{ old('stock') }}" min="0" placeholder="Masukkan stock">

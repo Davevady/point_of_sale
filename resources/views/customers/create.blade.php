@@ -20,7 +20,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="name">Nama</label>
+                            <label for="name">Nama <span class="text-danger">*</span></label>
                             <input type="text" name="name" id="name"
                                 class="form-control @error('name') is-invalid @enderror"
                                 value="{{ old('name') }}" placeholder="Masukkan nama customer">
@@ -32,7 +32,7 @@
 
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="nik">NIK</label>
+                            <label for="nik">NIK <span class="text-danger">*</span></label>
                             <input type="text" name="nik" id="nik"
                                 class="form-control @error('nik') is-invalid @enderror"
                                 value="{{ old('nik') }}" placeholder="Masukkan NIK">
@@ -46,7 +46,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="email">Email</label>
+                            <label for="email">Email <span class="text-danger">*</span></label>
                             <input type="email" name="email" id="email"
                                 class="form-control @error('email') is-invalid @enderror"
                                 value="{{ old('email') }}" placeholder="Masukkan email">
@@ -58,7 +58,7 @@
 
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="no_tlp">No. Telepon</label>
+                            <label for="no_tlp">No. Telepon <span class="text-danger">*</span></label>
                             <input type="text" name="no_tlp" id="no_tlp"
                                 class="form-control @error('no_tlp') is-invalid @enderror"
                                 value="{{ old('no_tlp') }}" placeholder="Masukkan nomor telepon">
@@ -72,7 +72,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="address">Alamat</label>
+                            <label for="address">Alamat <span class="text-danger">*</span></label>
                             <textarea name="address" id="address" rows="3"
                                 class="form-control @error('address') is-invalid @enderror"
                                 placeholder="Masukkan alamat">{{ old('address') }}</textarea>
@@ -84,7 +84,7 @@
 
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="doc_kk">Dokumen KK</label>
+                            <label for="doc_kk">Dokumen KK <span class="text-danger">*</span></label>
                             <input type="file" name="doc_kk" id="doc_kk"
                                 class="form-control-file @error('doc_kk') is-invalid @enderror">
                             <small class="form-text text-muted">Format: jpg, jpeg, png, pdf. Maks. 2MB.</small>

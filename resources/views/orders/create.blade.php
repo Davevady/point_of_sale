@@ -28,7 +28,7 @@
                 <input type="hidden" name="customer_id" id="customer_id" value="{{ old('customer_id') }}">
 
                 <div class="form-group">
-                    <label for="customer_nik">NIK</label>
+                    <label for="customer_nik">NIK <span class="text-danger">*</span></label>
                     <div class="input-group" style="max-width: 420px;">
                         <input type="text" name="customer_nik" id="customer_nik" class="form-control"
                             value="{{ old('customer_nik') }}" placeholder="Masukkan NIK customer">
@@ -47,7 +47,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="customer_name">Nama Customer</label>
+                            <label for="customer_name">Nama Customer <span class="text-danger">*</span></label>
                             <input type="text" name="customer_name" id="customer_name" class="form-control"
                                 value="{{ old('customer_name') }}" placeholder="Masukkan nama customer">
                             @error('customer_name')

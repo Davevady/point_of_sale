@@ -54,7 +54,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="status">Status</label>
+                            <label for="status">Status <span class="text-danger">*</span></label>
                             <select name="status" id="status" class="form-control">
                                 <option value="pending" {{ $currentStatus == 'pending' ? 'selected' : '' }}>
                                     Pending

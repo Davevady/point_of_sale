@@ -46,7 +46,7 @@
 
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="label">Label</label>
+                            <label for="label">Label <span class="text-danger">*</span></label>
                             <input type="text" name="label" id="label"
                                 class="form-control @error('label') is-invalid @enderror"
                                 value="{{ old('label', $permission->label) }}"
@@ -61,7 +61,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="group">Group</label>
+                            <label for="group">Group <span class="text-danger">*</span></label>
                             <input type="text" name="group" id="group"
                                 class="form-control @error('group') is-invalid @enderror"
                                 value="{{ old('group', $permission->group) }}"

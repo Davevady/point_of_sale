@@ -78,11 +78,11 @@ class CustomerController extends Controller
         abort_unless(auth()->user()->hasPermission('customers.create'), 403);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
+            'email' => 'required|email|max:255',
             'nik' => 'required|string|max:255|unique:customers,nik',
-            'address' => 'nullable|string',
-            'no_tlp' => 'nullable|string|max:255',
-            'doc_kk' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'address' => 'required|string',
+            'no_tlp' => 'required|string|max:255',
+            'doc_kk' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
         if ($request->hasFile('doc_kk')) {
@@ -124,11 +124,11 @@ class CustomerController extends Controller
         abort_unless(auth()->user()->hasPermission('customers.edit'), 403);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
+            'email' => 'required|email|max:255',
             'nik' => 'required|string|max:255|unique:customers,nik,' . $customer->id,
-            'address' => 'nullable|string',
-            'no_tlp' => 'nullable|string|max:255',
-            'doc_kk' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'address' => 'required|string',
+            'no_tlp' => 'required|string|max:255',
+            'doc_kk' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
         if ($request->hasFile('doc_kk')) {

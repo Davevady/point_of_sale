@@ -21,7 +21,7 @@
             @method('PUT')
 
             <div class="form-group">
-                <label for="name">Nama Role</label>
+                <label for="name">Nama Role <span class="text-danger">*</span></label>
                 <input
                     type="text"
                     name="name"

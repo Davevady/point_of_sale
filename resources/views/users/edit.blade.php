@@ -20,7 +20,7 @@
                 @method('PUT')
 
                 <div class="form-group">
-                    <label for="name">Nama</label>
+                    <label for="name">Nama <span class="text-danger">*</span></label>
                     <input type="text" name="name" id="name"
                         class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $user->name) }}"
                         placeholder="Masukkan nama">
@@ -30,7 +30,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="email">Email <span class="text-danger">*</span></label>
                     <input type="email" name="email" id="email"
                         class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}"
                         placeholder="Masukkan email">

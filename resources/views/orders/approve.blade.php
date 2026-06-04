@@ -105,7 +105,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="font-weight-bold small">Catatan Penolakan</label>
+                            <label class="font-weight-bold small">Catatan Penolakan <span class="text-danger">*</span></label>
                             <textarea name="rejection_note" class="form-control @error('rejection_note') is-invalid @enderror"
                                 rows="3" placeholder="Wajib diisi jika menolak order..."
                                 id="rejection_note">{{ old('rejection_note') }}</textarea>

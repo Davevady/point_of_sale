@@ -20,7 +20,7 @@
                 @csrf
 
                 <div class="form-group">
-                    <label for="name">Nama Kategori</label>
+                    <label for="name">Nama Kategori <span class="text-danger">*</span></label>
                     <input
                         type="text"
                         name="name"
