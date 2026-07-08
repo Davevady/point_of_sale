@@ -32,6 +32,24 @@
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
+            @if ($errors->has('stock_error'))
+                <div class="mt-3 pt-3 border-top border-danger">
+                    <p class="mb-2 font-weight-bold">Tindakan Alternatif:</p>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="document.querySelector('button[value=\'suspend\']').click()">
+                        <i class="fas fa-pause mr-1"></i> Tunda Pembayaran
+                    </button>
+                    @if(auth()->user()->hasPermission('orders.edit'))
+                        <form action="{{ route('orders.update', $order) }}" method="POST" class="d-inline ml-1">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="status" value="cancelled">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin membatalkan order ini?')">
+                                <i class="fas fa-times mr-1"></i> Batalkan Order
+                            </button>
+                        </form>
+                    @endif
+                </div>
+            @endif
         </div>
     @endif
 
@@ -273,6 +291,17 @@
     taxValueInput.addEventListener('input', recalcTax);
     paymentMethod.addEventListener('change', toggleCashCalc);
     amountReceived.addEventListener('input', recalcChange);
+
+    document.getElementById('payment-form').addEventListener('submit', function (e) {
+        if (e.submitter && e.submitter.value === 'pay' && paymentMethod.value === 'cash') {
+            const received = parseFloat(amountReceived.value) || 0;
+            if (received < currentGrandTotal) {
+                e.preventDefault();
+                alert('Uang yang diterima kurang dari Grand Total. Silakan periksa kembali.');
+                amountReceived.focus();
+            }
+        }
+    });
 
     // Init
     recalcTax();

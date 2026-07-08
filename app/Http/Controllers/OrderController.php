@@ -132,6 +132,11 @@ class OrderController extends Controller
         $order->load(['customer', 'orderDetails.product.category']);
         $products = Product::with('category')->orderBy('name')->get();
 
+        // Menambahkan info stok pada nama produk yang akan dipilih
+        $products->each(function ($p) {
+            $p->name = $p->name . ' (Stok: ' . $p->stock . ')';
+        });
+
         return view('orders.items', compact('order', 'products'));
     }
 
@@ -148,7 +153,38 @@ class OrderController extends Controller
             'items'              => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.qty'        => 'required|integer|min:1',
+        ], [
+            'items.required'              => 'Minimal harus ada 1 item produk yang ditambahkan.',
+            'items.*.product_id.required' => 'Produk ke-:position wajib dipilih.',
+            'items.*.product_id.exists'   => 'Produk ke-:position tidak valid.',
+            'items.*.qty.required'        => 'Kuantitas (Qty) ke-:position wajib diisi.',
+            'items.*.qty.integer'         => 'Kuantitas (Qty) ke-:position harus berupa angka bulat.',
+            'items.*.qty.min'             => 'Kuantitas (Qty) ke-:position minimal :min.',
         ]);
+
+        // Cek duplikat produk
+        $productIds = [];
+        $pos = 1;
+        foreach ($request->input('items', []) as $item) {
+            $pid = $item['product_id'];
+            if (isset($productIds[$pid])) {
+                $pos1 = $productIds[$pid];
+                $pos2 = $pos;
+                return back()->withErrors(['items' => "Produk ke $pos1 dan ke $pos2 yang dipilih sama."])->withInput();
+            }
+            $productIds[$pid] = $pos;
+            $pos++;
+        }
+
+        // Cek stok produk yang diinput
+        if ($request->input('action') !== 'suspend') {
+            foreach ($validated['items'] as $item) {
+                $product = Product::find($item['product_id']);
+                if ($product && $product->stock < $item['qty']) {
+                    return back()->withErrors(['stock_error' => "Maaf, stok produk {$product->name} saat ini sisa {$product->stock}, tidak mencukupi untuk pesanan sebanyak {$item['qty']}."])->withInput();
+                }
+            }
+        }
 
         DB::transaction(function () use ($validated, $order) {
             $order->orderDetails()->delete();
@@ -219,6 +255,14 @@ class OrderController extends Controller
         ]);
 
         if ($validated['action'] === 'approve') {
+            // Cek ketersediaan stok sebelum disetujui (antisipasi jika stok dihabiskan transaksi lain saat pending)
+            foreach ($order->orderDetails as $detail) {
+                $product = $detail->product;
+                if ($product && $product->stock < $detail->qty) {
+                    return back()->withErrors(['stock_error' => "Maaf, order tidak dapat disetujui karena stok produk {$product->name} hanya tersisa {$product->stock}, sedangkan pesanan membutuhkan {$detail->qty}."]);
+                }
+            }
+
             $order->update([
                 'status'         => 'approved',
                 'approved_by'    => auth()->id(),
@@ -291,7 +335,9 @@ class OrderController extends Controller
             foreach ($order->orderDetails as $detail) {
                 $product = Product::lockForUpdate()->findOrFail($detail->product_id);
                 if ($product->stock < $detail->qty) {
-                    abort(422, "Stock produk {$product->name} tidak mencukupi.");
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'stock_error' => "Maaf, pembayaran gagal diproses. Stok produk {$product->name} hanya tersisa {$product->stock}, sedangkan pesanan ini membutuhkan {$detail->qty}."
+                    ]);
                 }
             }
 
@@ -381,7 +427,9 @@ class OrderController extends Controller
                     $product = Product::lockForUpdate()->findOrFail($detail->product_id);
 
                     if ($product->stock < $detail->qty) {
-                        abort(422, "Stock produk {$product->name} tidak mencukupi.");
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'stock_error' => "Maaf, status tidak dapat diubah ke Paid. Stok produk {$product->name} hanya tersisa {$product->stock}, tidak mencukupi untuk pesanan sebanyak {$detail->qty}."
+                        ]);
                     }
                 }
 

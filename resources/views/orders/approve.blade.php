@@ -26,6 +26,17 @@
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
+            @if ($errors->has('stock_error'))
+                <div class="mt-3 pt-3 border-top border-danger">
+                    <p class="mb-2 font-weight-bold">Tindakan Alternatif:</p>
+                    <a href="{{ route('orders.index') }}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-pause mr-1"></i> Tunda (Kembali)
+                    </a>
+                    <button type="button" class="btn btn-danger btn-sm ml-1" onclick="document.getElementById('rejection_note').value = 'Stok tidak memadai'; document.querySelector('button[value=\'reject\']').click()">
+                        <i class="fas fa-times mr-1"></i> Tolak Order (Stok Habis)
+                    </button>
+                </div>
+            @endif
         </div>
     @endif
 

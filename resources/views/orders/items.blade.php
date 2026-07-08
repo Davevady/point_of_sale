@@ -3,6 +3,12 @@
 @section('title', 'Tambah Produk')
 
 @section('content')
+    <style>
+        .already-selected {
+            display: none !important;
+        }
+    </style>
+
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Tambah Produk</h1>
         <a href="{{ route('orders.index') }}" class="btn btn-sm btn-secondary shadow-sm">Kembali ke Daftar</a>
@@ -30,6 +36,24 @@
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
+            @if ($errors->has('stock_error'))
+                <div class="mt-3 pt-3 border-top border-danger">
+                    <p class="mb-2 font-weight-bold">Tindakan Alternatif:</p>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="document.querySelector('button[value=\'suspend\']').click()">
+                        <i class="fas fa-pause mr-1"></i> Simpan & Tunda
+                    </button>
+                    @if(auth()->user()->hasPermission('orders.edit'))
+                        <form action="{{ route('orders.update', $order) }}" method="POST" class="d-inline ml-1">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="status" value="cancelled">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin membatalkan order ini?')">
+                                <i class="fas fa-times mr-1"></i> Batalkan Order
+                            </button>
+                        </form>
+                    @endif
+                </div>
+            @endif
         </div>
     @endif
 
@@ -214,13 +238,46 @@
         container.insertAdjacentHTML('beforeend', html);
         window.initSearchableSelect(uid);
         itemIndex++;
+
+        updateProductOptions();
     });
 
     document.addEventListener('click', function (e) {
         if (e.target.classList.contains('remove-item')) {
             const items = document.querySelectorAll('.order-item');
-            if (items.length > 1) e.target.closest('.order-item').remove();
+            if (items.length > 1) {
+                e.target.closest('.order-item').remove();
+                updateProductOptions();
+            }
+        }
+
+        if (e.target.closest('.searchable-select-opt')) {
+            setTimeout(updateProductOptions, 50);
         }
     });
+
+    function updateProductOptions() {
+        const selectedIds = Array.from(document.querySelectorAll('input[name^="items"][name$="[product_id]"]'))
+            .map(input => input.value)
+            .filter(val => val !== '');
+            
+        document.querySelectorAll('.searchable-select-wrapper').forEach(wrapper => {
+            const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+            const currentVal = hiddenInput ? hiddenInput.value : '';
+            
+            wrapper.querySelectorAll('.searchable-select-opt').forEach(opt => {
+                const val = opt.dataset.value;
+                if (!val) return;
+                
+                if (selectedIds.includes(val) && val !== currentVal) {
+                    opt.classList.add('already-selected');
+                } else {
+                    opt.classList.remove('already-selected');
+                }
+            });
+        });
+    }
+
+    setTimeout(updateProductOptions, 100);
 </script>
 @endpush
