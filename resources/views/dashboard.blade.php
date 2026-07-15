@@ -4,6 +4,26 @@
 
 @section('content')
 
+@push('styles')
+<style>
+    /* Let the cards that exist fill each row, regardless of permissions/count. */
+    .dashboard-summary > .col-xl-3 {
+        flex: 1 1 240px;
+        max-width: none;
+    }
+
+    .dashboard-summary > .dashboard-revenue-card {
+        flex-basis: 100%;
+    }
+
+    @media (max-width: 575.98px) {
+        .dashboard-summary > .col-xl-3 {
+            flex-basis: 100%;
+        }
+    }
+</style>
+@endpush
+
 {{-- ══════════════════════════════════════════════════════════════════
      HEADING + GLOBAL DATE FILTER
 ══════════════════════════════════════════════════════════════════ --}}
@@ -54,24 +74,9 @@
      ROW 1 – SUMMARY CARDS (period-filtered)
 ══════════════════════════════════════════════════════════════════ --}}
 @isset($ordersCount)
-<div class="row">
+<div class="row dashboard-summary">
 
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Orders Paid</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $ordersCount }}</div>
-                        <div class="text-xs text-muted">{{ $periodLabel }}</div>
-                    </div>
-                    <div class="col-auto"><i class="fas fa-check-circle fa-2x text-gray-300"></i></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-xl-3 col-md-6 mb-4 dashboard-revenue-card">
         <div class="card border-left-primary shadow h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -83,6 +88,21 @@
                         <div class="text-xs text-muted">{{ $periodLabel }}</div>
                     </div>
                     <div class="col-auto"><i class="fas fa-money-bill-wave fa-2x text-gray-300"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Orders Paid</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $ordersCount }}</div>
+                        <div class="text-xs text-muted">{{ $periodLabel }}</div>
+                    </div>
+                    <div class="col-auto"><i class="fas fa-check-circle fa-2x text-gray-300"></i></div>
                 </div>
             </div>
         </div>
@@ -118,6 +138,51 @@
         </div>
     </div>
 
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Menunggu Approval</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $ordersAwaitingApproval }}</div>
+                        <div class="text-xs text-muted">{{ $periodLabel }}</div>
+                    </div>
+                    <div class="col-auto"><i class="fas fa-hourglass-half fa-2x text-gray-300"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Orders Disetujui</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $ordersApproved }}</div>
+                        <div class="text-xs text-muted">{{ $periodLabel }}</div>
+                    </div>
+                    <div class="col-auto"><i class="fas fa-thumbs-up fa-2x text-gray-300"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-danger shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Orders Ditolak</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $ordersRejected }}</div>
+                        <div class="text-xs text-muted">{{ $periodLabel }}</div>
+                    </div>
+                    <div class="col-auto"><i class="fas fa-ban fa-2x text-gray-300"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 @endisset
 
@@ -127,7 +192,7 @@
 @endphp
 
 @if($showRow2)
-<div class="row">
+<div class="row dashboard-summary">
 
     @isset($totalCustomers)
     <div class="col-xl-3 col-md-6 mb-4">
@@ -209,9 +274,9 @@
                     <i class="fas fa-chart-line mr-1"></i> Tren Order &mdash; {{ $periodLabel }}
                 </h6>
                 <div class="d-flex" style="gap:12px; font-size:12px;">
-                    <span><span class="d-inline-block rounded-circle mr-1" style="width:10px;height:10px;background:#1cc88a;"></span>Paid</span>
-                    <span><span class="d-inline-block rounded-circle mr-1" style="width:10px;height:10px;background:#f6c23e;"></span>Pending</span>
-                    <span><span class="d-inline-block rounded-circle mr-1" style="width:10px;height:10px;background:#e74a3b;"></span>Cancelled</span>
+                    @foreach($chartData['statuses'] as $status)
+                        <span><span class="d-inline-block rounded-circle mr-1" style="width:10px;height:10px;background:{{ $status['color'] }};"></span>{{ $status['label'] }}</span>
+                    @endforeach
                 </div>
             </div>
             <div class="card-body">
@@ -266,13 +331,7 @@
                                     <td class="small">{{ Str::limit($order->customer->name ?? '-', 12) }}</td>
                                     <td class="small">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</td>
                                     <td>
-                                        @if($order->status === 'paid')
-                                            <span class="badge badge-success">Paid</span>
-                                        @elseif($order->status === 'pending')
-                                            <span class="badge badge-warning text-dark">Pending</span>
-                                        @else
-                                            <span class="badge badge-danger">Cancelled</span>
-                                        @endif
+                                        <span class="badge {{ $order->status_badge }}">{{ $order->status_label }}</span>
                                     </td>
                                 </tr>
                             @empty
@@ -416,38 +475,16 @@
         type: 'line',
         data: {
             labels: chartData.labels,
-            datasets: [
-                {
-                    label: 'Paid',
-                    data: chartData.paid,
-                    borderColor: '#1cc88a',
-                    backgroundColor: 'rgba(28,200,138,0.08)',
-                    borderWidth: 2,
-                    pointRadius: 3,
-                    tension: 0.35,
-                    fill: true,
-                },
-                {
-                    label: 'Pending',
-                    data: chartData.pending,
-                    borderColor: '#f6c23e',
-                    backgroundColor: 'rgba(246,194,62,0.08)',
-                    borderWidth: 2,
-                    pointRadius: 3,
-                    tension: 0.35,
-                    fill: true,
-                },
-                {
-                    label: 'Cancelled',
-                    data: chartData.cancelled,
-                    borderColor: '#e74a3b',
-                    backgroundColor: 'rgba(231,74,59,0.05)',
-                    borderWidth: 2,
-                    pointRadius: 3,
-                    tension: 0.35,
-                    fill: false,
-                },
-            ]
+            datasets: Object.entries(chartData.statuses).map(([key, status]) => ({
+                label: status.label,
+                data: chartData.series[key],
+                borderColor: status.color,
+                backgroundColor: `${status.color}18`,
+                borderWidth: 2,
+                pointRadius: 3,
+                tension: 0.35,
+                fill: false,
+            }))
         },
         options: {
             responsive: true,

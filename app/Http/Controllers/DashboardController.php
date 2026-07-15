@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\User;
 use Carbon\Carbon;
@@ -34,15 +35,28 @@ class DashboardController extends Controller
 
         if ($user->hasPermission('orders.view')) {
             // Summary cards – all filtered by period
-            $data['ordersCount']    = Order::where('status', 'paid')
+            $data['ordersCount'] = Order::where('status', 'paid')
+                ->whereHas('payments', fn ($query) => $query->whereBetween('paid_at', [$from, $to]))
+                ->count();
+
+            $data['revenueTotal'] = (float) Payment::whereHas(
+                'order',
+                fn ($query) => $query->where('status', 'paid')
+            )->whereBetween('paid_at', [$from, $to])->sum('amount');
+
+            $data['ordersPending']  = Order::where('status', 'pending')
                 ->whereBetween('order_date', [$from, $to])
                 ->count();
 
-            $data['revenueTotal']   = (float) Order::where('status', 'paid')
+            $data['ordersAwaitingApproval'] = Order::where('status', 'pending_approval')
                 ->whereBetween('order_date', [$from, $to])
-                ->sum('grand_total');
+                ->count();
 
-            $data['ordersPending']  = Order::where('status', 'pending')
+            $data['ordersApproved'] = Order::where('status', 'approved')
+                ->whereBetween('order_date', [$from, $to])
+                ->count();
+
+            $data['ordersRejected'] = Order::where('status', 'rejected')
                 ->whereBetween('order_date', [$from, $to])
                 ->count();
 
@@ -55,7 +69,7 @@ class DashboardController extends Controller
 
             // Recent orders – latest 8, not date-filtered
             $data['recentOrders'] = Order::with(['customer', 'payments'])
-                ->latest()
+                ->orderByDesc('order_date')
                 ->limit(8)
                 ->get();
         }
@@ -69,7 +83,7 @@ class DashboardController extends Controller
                 ->selectRaw('SUM(grand_total) as total_spent')
                 ->with('customer')
                 ->where('status', 'paid')
-                ->whereBetween('order_date', [$from, $to])
+                ->whereHas('payments', fn ($query) => $query->whereBetween('paid_at', [$from, $to]))
                 ->groupBy('customer_id')
                 ->orderByDesc('order_count')
                 ->limit(8)
@@ -123,10 +137,16 @@ class DashboardController extends Controller
             ->get()
             ->groupBy('date');
 
-        $labels    = [];
-        $paid      = [];
-        $pending   = [];
-        $cancelled = [];
+        $labels = [];
+        $statuses = [
+            'paid'             => ['label' => 'Paid', 'color' => '#1cc88a'],
+            'pending'          => ['label' => 'Pending', 'color' => '#f6c23e'],
+            'pending_approval' => ['label' => 'Menunggu Approval', 'color' => '#36b9cc'],
+            'approved'         => ['label' => 'Disetujui', 'color' => '#4e73df'],
+            'rejected'         => ['label' => 'Ditolak', 'color' => '#e74a3b'],
+            'cancelled'        => ['label' => 'Dibatalkan', 'color' => '#858796'],
+        ];
+        $series = array_fill_keys(array_keys($statuses), []);
 
         $cursor = $from->copy()->startOfDay();
         $end    = $to->copy()->startOfDay();
@@ -135,14 +155,14 @@ class DashboardController extends Controller
             $date      = $cursor->format('Y-m-d');
             $dayRows   = $rows->get($date, collect());
 
-            $labels[]    = $cursor->format('d M');
-            $paid[]      = (int) ($dayRows->firstWhere('status', 'paid')['count'] ?? 0);
-            $pending[]   = (int) ($dayRows->firstWhere('status', 'pending')['count'] ?? 0);
-            $cancelled[] = (int) ($dayRows->firstWhere('status', 'cancelled')['count'] ?? 0);
+            $labels[] = $cursor->format('d M');
+            foreach (array_keys($statuses) as $status) {
+                $series[$status][] = (int) ($dayRows->firstWhere('status', $status)['count'] ?? 0);
+            }
 
             $cursor->addDay();
         }
 
-        return compact('labels', 'paid', 'pending', 'cancelled');
+        return compact('labels', 'statuses', 'series');
     }
 }
