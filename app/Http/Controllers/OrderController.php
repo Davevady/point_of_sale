@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Payment;
 use App\Models\Product;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,25 +22,7 @@ class OrderController extends Controller
         $status  = $request->status;
         $perPage = in_array((int) $request->per_page, [10, 25, 50, 100]) ? (int) $request->per_page : 10;
 
-        $activePeriod = $request->input('period', '1d');
-
-        $from = null;
-        $to   = null;
-
-        if ($request->filled('from') && $request->filled('to')) {
-            $from = Carbon::parse($request->from)->startOfDay();
-            $to   = Carbon::parse($request->to)->endOfDay();
-            $activePeriod = 'custom';
-        } elseif ($activePeriod === '1d') {
-            $from = now()->startOfDay();
-            $to   = now()->endOfDay();
-        } elseif ($activePeriod === '7d') {
-            $from = now()->subDays(6)->startOfDay();
-            $to   = now()->endOfDay();
-        } elseif ($activePeriod === '30d') {
-            $from = now()->subDays(29)->startOfDay();
-            $to   = now()->endOfDay();
-        }
+        [$from, $to, $activePeriod] = $this->resolvePeriodRange($request);
 
         $orders = Order::with(['customer', 'user', 'payments'])
             ->withCount('orderDetails')
@@ -64,6 +47,43 @@ class OrderController extends Controller
             'from',
             'to'
         ));
+    }
+
+    public function exportPdf(Request $request)
+    {
+        abort_unless(auth()->user()->hasPermission('orders.view'), 403);
+
+        [$from, $to, $activePeriod] = $this->resolvePeriodRange($request);
+
+        $search = $request->search;
+        $status = $request->status;
+
+        $orders = Order::with(['customer', 'user', 'payments'])
+            ->withCount('orderDetails')
+            ->when($search, function ($q) use ($search) {
+                $q->where(function ($q2) use ($search) {
+                    $q2->where('invoice_num', 'like', "%{$search}%")
+                        ->orWhereHas('customer', fn($q3) => $q3->where('name', 'like', "%{$search}%"));
+                });
+            })
+            ->when($status, fn($q) => $q->where('status', $status))
+            ->when($from && $to, fn($q) => $q->whereBetween('order_date', [$from, $to]))
+            ->orderBy('order_date', 'desc')
+            ->get();
+
+        $periodLabel = $this->periodLabel($activePeriod, $from, $to);
+        $fileName = 'orders-' . $activePeriod . '-' . now()->format('YmdHis') . '.pdf';
+
+        return Pdf::loadView('orders.pdf.index', compact(
+            'orders',
+            'search',
+            'status',
+            'periodLabel',
+            'from',
+            'to'
+        ))
+            ->setPaper('a4', 'landscape')
+            ->download($fileName);
     }
 
     public function create()
@@ -384,6 +404,25 @@ class OrderController extends Controller
         return view('orders.show', compact('order'));
     }
 
+    public function exportOrderPdf(Order $order)
+    {
+        abort_unless(auth()->user()->hasPermission('orders.view'), 403);
+
+        $order->load([
+            'customer',
+            'user',
+            'approvedBy',
+            'orderDetails.product.category',
+            'payments',
+        ]);
+
+        $invoice = str_replace(['/', '\\'], '-', $order->invoice_num);
+
+        return Pdf::loadView('orders.pdf.show', compact('order'))
+            ->setPaper('a4')
+            ->download('order-' . $invoice . '.pdf');
+    }
+
     public function edit(Order $order)
     {
         abort_unless(auth()->user()->hasPermission('orders.edit'), 403);
@@ -497,6 +536,53 @@ class OrderController extends Controller
         }
 
         return $taxValue;
+    }
+
+    private function resolvePeriodRange(Request $request): array
+    {
+        $activePeriod = $request->input('period', '1d');
+        $from = null;
+        $to = null;
+
+        if ($request->filled('from') && $request->filled('to')) {
+            $from = Carbon::parse($request->from)->startOfDay();
+            $to = Carbon::parse($request->to)->endOfDay();
+            $activePeriod = 'custom';
+        } elseif ($activePeriod === '1d') {
+            $from = now()->startOfDay();
+            $to = now()->endOfDay();
+        } elseif ($activePeriod === '7d') {
+            $from = now()->subDays(6)->startOfDay();
+            $to = now()->endOfDay();
+        } elseif ($activePeriod === '30d') {
+            $from = now()->subDays(29)->startOfDay();
+            $to = now()->endOfDay();
+        } elseif ($activePeriod === 'this_month') {
+            $from = now()->startOfMonth();
+            $to = now()->endOfMonth();
+        } elseif ($activePeriod === 'this_year') {
+            $from = now()->startOfYear();
+            $to = now()->endOfYear();
+        } else {
+            $activePeriod = '1d';
+            $from = now()->startOfDay();
+            $to = now()->endOfDay();
+        }
+
+        return [$from, $to, $activePeriod];
+    }
+
+    private function periodLabel(string $period, ?Carbon $from, ?Carbon $to): string
+    {
+        return match ($period) {
+            '1d' => 'Hari Ini',
+            '7d' => '7 Hari Terakhir',
+            '30d' => '30 Hari Terakhir',
+            'this_month' => 'Bulan Ini',
+            'this_year' => 'Tahun Ini',
+            'custom' => $from && $to ? $from->format('d M Y') . ' - ' . $to->format('d M Y') : 'Custom',
+            default => 'Hari Ini',
+        };
     }
 
     private function decreaseStockFromDetails($details): void

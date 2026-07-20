@@ -5,9 +5,14 @@
 @section('content')
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Detail Order</h1>
-        <a href="{{ route('orders.index') }}" class="btn btn-sm btn-secondary shadow-sm">
-            Kembali
-        </a>
+        <div class="d-flex align-items-center" style="gap: 6px;">
+            <a href="{{ route('orders.exportOrderPdf', $order->id) }}" class="btn btn-sm btn-success shadow-sm">
+                <i class="fas fa-file-pdf fa-sm text-white-50"></i> Export PDF
+            </a>
+            <a href="{{ route('orders.index') }}" class="btn btn-sm btn-secondary shadow-sm">
+                Kembali
+            </a>
+        </div>
     </div>
 
     <div class="card shadow mb-4 border-0">

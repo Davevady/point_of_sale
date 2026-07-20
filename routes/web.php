@@ -35,7 +35,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('customers', CustomerController::class);
     Route::resource('product-categories', ProductCategoryController::class);
     Route::resource('products', ProductController::class);
+    Route::get('orders/export/pdf', [OrderController::class, 'exportPdf'])->name('orders.exportPdf');
     Route::resource('orders', OrderController::class);
+    Route::get('orders/{order}/export/pdf', [OrderController::class, 'exportOrderPdf'])->name('orders.exportOrderPdf');
     Route::get('orders/{order}/items', [OrderController::class, 'showItems'])->name('orders.items');
     Route::post('orders/{order}/items', [OrderController::class, 'storeItems'])->name('orders.storeItems');
     Route::get('orders/{order}/approve', [OrderController::class, 'showApproval'])->name('orders.approve');

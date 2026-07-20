@@ -8,11 +8,28 @@
             <h1 class="h3 mb-0 text-gray-800">Orders</h1>
             <p class="mb-0 text-muted small">Kelola transaksi order dari halaman ini.</p>
         </div>
-        @if (auth()->user()->hasPermission('orders.create'))
-            <a href="{{ route('orders.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Order
-            </a>
-        @endif
+        <div class="d-flex align-items-center" style="gap: 6px;">
+            <div class="dropdown">
+                <button class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm dropdown-toggle" type="button"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-file-pdf fa-sm text-white-50"></i> Export PDF
+                </button>
+                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
+                    @foreach (['1d' => '1D', '7d' => '7D', '30d' => '30D', 'this_month' => 'This Month', 'this_year' => 'This Year'] as $key => $label)
+                        <a class="dropdown-item"
+                            href="{{ route('orders.exportPdf', array_merge(request()->only(['search', 'status']), ['period' => $key])) }}">
+                            {{ $label }}
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+
+            @if (auth()->user()->hasPermission('orders.create'))
+                <a href="{{ route('orders.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                    <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Order
+                </a>
+            @endif
+        </div>
     </div>
 
     @if (session('success'))
@@ -55,7 +72,7 @@
                     <div class="col-auto mb-2">
                         <label class="small text-muted font-weight-bold d-block mb-1">Periode</label>
                         <div class="btn-group btn-group-sm" role="group">
-                            @foreach (['1d' => '1D', '7d' => '7D', '30d' => '30D'] as $key => $label)
+                            @foreach (['1d' => '1D', '7d' => '7D', '30d' => '30D', 'this_month' => 'This Month', 'this_year' => 'This Year'] as $key => $label)
                                 <button type="button"
                                     class="btn {{ ($activePeriod ?? '7d') === $key ? 'btn-primary' : 'btn-outline-secondary' }} period-btn"
                                     data-period="{{ $key }}">{{ $label }}</button>
@@ -70,7 +87,7 @@
                             <input type="date" name="from" id="inputFrom" class="form-control form-control-sm"
                                 style="width:135px;"
                                 value="{{ $from ? $from->format('Y-m-d') : '' }}">
-                            <span class="text-muted small">→</span>
+                            <span class="text-muted small">-&gt;</span>
                             <input type="date" name="to" id="inputTo" class="form-control form-control-sm"
                                 style="width:135px;"
                                 value="{{ $to ? $to->format('Y-m-d') : '' }}">
@@ -102,9 +119,13 @@
                                 <span class="badge badge-info">7 Hari Terakhir</span>
                             @elseif($activePeriod === '30d')
                                 <span class="badge badge-info">30 Hari Terakhir</span>
+                            @elseif($activePeriod === 'this_month')
+                                <span class="badge badge-info">Bulan Ini</span>
+                            @elseif($activePeriod === 'this_year')
+                                <span class="badge badge-info">Tahun Ini</span>
                             @elseif($activePeriod === 'custom' && $from && $to)
                                 <span class="badge badge-info">
-                                    {{ $from->format('d M Y') }} → {{ $to->format('d M Y') }}
+                                    {{ $from->format('d M Y') }} - {{ $to->format('d M Y') }}
                                 </span>
                             @endif
                         </span>
@@ -172,6 +193,7 @@
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
                                     <a class="dropdown-item" href="{{ route('orders.show', $order->id) }}">Detail</a>
+                                    <a class="dropdown-item" href="{{ route('orders.exportOrderPdf', $order->id) }}">Export PDF</a>
                                     @if (auth()->user()->hasPermission('orders.edit'))
                                         <a class="dropdown-item" href="{{ route('orders.edit', $order->id) }}">Edit</a>
                                     @endif
